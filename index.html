@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Body Sentinels: Mobile Protocol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Bungee&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
+    <style>
+        body {
+            background: #1a0202;
+            color: #fee2e2;
+            font-family: 'Space Grotesk', sans-serif;
+            overflow: hidden;
+            margin: 0;
+            touch-action: manipulation;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        #game-stage {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            background: radial-gradient(circle at center, #450a0a 0%, #1a0202 100%);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .wbc-ninja {
+            position: absolute;
+            right: 5%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 80px;
+            height: 80px;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Mobile layout for the character */
+        @media (max-width: 768px) {
+            .wbc-ninja {
+                right: auto;
+                left: 50%;
+                top: 80px;
+                transform: translateX(-50%);
+                width: 70px;
+                height: 70px;
+            }
+        }
+
+        .wbc-body {
+            position: relative;
+            width: 70px;
+            height: 70px;
+            background: #ffffff;
+            border-radius: 50%;
+            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.1), 0 0 30px rgba(255,255,255,0.3);
+            border: 2px solid #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            animation: float-wbc 4s infinite ease-in-out;
+        }
+
+        @media (min-width: 769px) {
+            .wbc-body { width: 100px; height: 100px; }
+        }
+
+        .ninja-mask {
+            position: absolute;
+            top: 25%;
+            width: 100%;
+            height: 18px;
+            background: #1a1a1a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            overflow: hidden;
+        }
+
+        .ninja-eye {
+            width: 8px;
+            height: 4px;
+            background: white;
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        .wbc-ninja.happy .ninja-eye { height: 8px; border-radius: 50%; background: #4ade80; }
+        .wbc-ninja.sad .ninja-eye { height: 10px; width: 10px; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); background: #60a5fa; transform: rotate(180deg); }
+        .wbc-ninja.king .ninja-eye { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; }
+
+        .crown { position: absolute; top: -35px; width: 45px; display: none; }
+        .wbc-ninja.king .crown { display: block; }
+
+        .wbc-gesture {
+            position: absolute;
+            top: -50px;
+            font-size: 40px;
+            opacity: 0;
+            transform: scale(0);
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .wbc-gesture.active { opacity: 1; transform: scale(1); }
+
+        .bacteria {
+            position: absolute;
+            font-size: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .antibody-y {
+            position: absolute;
+            width: 25px;
+            height: 25px;
+            z-index: 150;
+            pointer-events: none;
+        }
+
+        @keyframes float-wbc {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+
+        .hud {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 92%;
+            max-width: 600px;
+            z-index: 200;
+        }
+
+        /* Adjust HUD for desktop */
+        @media (min-width: 769px) {
+            .hud { top: 20px; bottom: auto; }
+        }
+
+        .terminal {
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 2px solid #ffffff;
+            padding: 15px;
+            border-radius: 12px;
+            backdrop-filter: blur(10px);
+        }
+
+        .answer-btn {
+            background: rgba(255, 255, 255, 0.07);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 14px;
+            text-align: left;
+            width: 100%;
+            transition: background 0.2s;
+        }
+
+        .answer-btn:active {
+            background: rgba(255, 255, 255, 0.25);
+        }
+
+        #overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 0, 0, 0.95);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .blood-cell {
+            position: absolute;
+            background: rgba(185, 28, 28, 0.05);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-stage">
+        <div id="bloodstream"></div>
+        
+        <div id="sentinel" class="wbc-ninja">
+            <svg class="crown" viewBox="0 0 100 100">
+                <path d="M10,80 L20,30 L40,50 L50,20 L60,50 L80,30 L90,80 Z" fill="#fbbf24" stroke="#d97706" stroke-width="4"/>
+            </svg>
+            <div id="gesture-icon" class="wbc-gesture">👍</div>
+            <div class="wbc-body">
+                <div class="ninja-mask"><div class="ninja-eye"></div><div class="ninja-eye"></div></div>
+                <div id="tear-container"></div>
+            </div>
+        </div>
+
+        <div id="main-hud" class="hud" style="display:none">
+            <div class="terminal mb-3 shadow-2xl">
+                <div class="flex justify-between items-center mb-2">
+                    <span class="text-[9px] text-blue-400 font-bold uppercase tracking-widest">Immune-Mobile v1</span>
+                    <span class="text-[9px] text-white/50">Score: <span id="q-count" class="text-white">0</span>/20</span>
+                </div>
+                <div id="definition-text" class="text-base md:text-lg font-bold text-white leading-tight h-14 flex items-center">
+                    Analyzing pathogens...
+                </div>
+            </div>
+            <div id="options-grid" class="grid grid-cols-1 gap-2"></div>
+        </div>
+    </div>
+
+    <div id="overlay">
+        <h1 style="font-family: 'Bungee';" id="final-title" class="text-3xl md:text-6xl text-white mb-4">PHAGOCYTE NINJA</h1>
+        <p id="overlay-msg" class="text-blue-100/60 mb-8 text-sm md:text-base max-w-xs">Neutralize 20 specific pathological threats. Tap the correct term to engage.</p>
+        <button id="start-btn" class="bg-white text-black px-10 py-4 rounded-full font-bold text-lg active:scale-95 transition-transform">
+            START DEFENSE
+        </button>
+    </div>
+
+    <script>
+        const dictionary = [
+            { term: "Sign", def: "An abnormality noticeable by others, e.g. a skin lesion" },
+            { term: "Symptom", def: "An abnormality observed by a patient, e.g. pain or nausea" },
+            { term: "Chronic", def: "A long-standing disorder, often not curable" },
+            { term: "Acute", def: "A sudden onset of disease" },
+            { term: "Idiopathic", def: "A disease of unknown cause" },
+            { term: "Acquired", def: "A disorder developing any time after birth (not inherited)" },
+            { term: "Inherited", def: "Condition passed from parents to offspring via genes" },
+            { term: "Genetic", def: "Disorder genetically predetermined, often inherited" },
+            { term: "Congenital", def: "Condition born with, due to uterine environment factors" },
+            { term: "Ischaemia", def: "Deficiency of blood supply to a part of the body" },
+            { term: "Necrosis", def: "Death of cells or tissue due to injury or disease" },
+            { term: "Infarction", def: "Tissue death caused by a complete lack of blood supply" },
+            { term: "Thrombus", def: "A blood clot formed within the vascular system" },
+            { term: "Embolus", def: "A blood clot or object carried by the blood to lodge elsewhere" },
+            { term: "Aetiology", def: "The study of the cause or origin of a disease" },
+            { term: "Pathogenesis", def: "The manner and mechanism of development of a disease" },
+            { term: "Complication", def: "Consequences that arise as a disease progresses" },
+            { term: "Risk Factor", def: "Increases chances of developing a disease" },
+            { term: "Prognosis", def: "Likely course and predicted outcome of a disease" },
+            { term: "Lesion", def: "A change in the structure of tissue or cells" }
+        ];
+
+        let gameActive = false;
+        let currentQIndex = 0;
+        let taggedCount = 0;
+        let synth;
+        let questions = [];
+        let activeBacteria = [];
+
+        const stage = document.getElementById('game-stage');
+        const overlay = document.getElementById('overlay');
+        const startBtn = document.getElementById('start-btn');
+        const defEl = document.getElementById('definition-text');
+        const gridEl = document.getElementById('options-grid');
+        const qCountEl = document.getElementById('q-count');
+        const sentinel = document.getElementById('sentinel');
+        const hud = document.getElementById('main-hud');
+
+        function initBackground() {
+            const container = document.getElementById('bloodstream');
+            for(let i=0; i<15; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'blood-cell';
+                const size = 20 + Math.random() * 40;
+                cell.style.width = size + 'px'; cell.style.height = size + 'px';
+                cell.style.left = Math.random() * 100 + 'vw';
+                cell.style.top = Math.random() * 100 + 'vh';
+                container.appendChild(cell);
+            }
+        }
+        initBackground();
+
+        function createBacteria(index) {
+            const b = document.createElement('div');
+            b.className = 'bacteria';
+            b.id = `bug-${index}`;
+            b.innerHTML = `🦠`;
+            
+            // Random positioning based on screen size
+            const startX = 20 + Math.random() * (window.innerWidth - 80);
+            const startY = 150 + Math.random() * (window.innerHeight - 400);
+            
+            stage.appendChild(b);
+            activeBacteria.push({ 
+                el: b, x: startX, y: startY, 
+                vx: (Math.random() - 0.5) * 2, 
+                vy: (Math.random() - 0.5) * 2,
+                antibody: null
+            });
+        }
+
+        function updateBacteria() {
+            if(!gameActive) return;
+            activeBacteria.forEach(b => {
+                b.x += b.vx; b.y += b.vy;
+                if (b.x < 10 || b.x > window.innerWidth - 50) b.vx *= -1;
+                if (b.y < 150 || b.y > window.innerHeight - 300) b.vy *= -1;
+                b.el.style.transform = `translate(${b.x}px, ${b.y}px) rotate(${b.x * 0.1}deg)`;
+                if (b.antibody) {
+                    b.antibody.style.transform = `translate(${b.x + 5}px, ${b.y - 5}px) rotate(45deg)`;
+                }
+            });
+            requestAnimationFrame(updateBacteria);
+        }
+
+        function nextQuestion() {
+            if (currentQIndex >= 20) {
+                finishGame();
+                return;
+            }
+
+            createBacteria(currentQIndex);
+            qCountEl.textContent = taggedCount;
+            const q = questions[currentQIndex];
+            defEl.textContent = q.def;
+
+            let others = dictionary.filter(d => d.term !== q.term).sort(() => 0.5 - Math.random()).slice(0, 3);
+            let opts = [...others, q].sort(() => 0.5 - Math.random());
+
+            gridEl.innerHTML = '';
+            opts.forEach(o => {
+                const b = document.createElement('button');
+                b.className = "answer-btn";
+                b.innerHTML = `<span>•</span> ${o.term}`;
+                b.onclick = () => handleAnswer(o.term === q.term, b, q.term);
+                gridEl.appendChild(b);
+            });
+        }
+
+        function handleAnswer(isCorrect, btn, correctTerm) {
+            const buttons = gridEl.querySelectorAll('button');
+            buttons.forEach(b => b.disabled = true);
+
+            if (isCorrect) {
+                taggedCount++;
+                btn.style.background = '#064e3b';
+                btn.style.borderColor = '#10b981';
+                showGesture('👍');
+                throwAntibody(currentQIndex);
+                if (synth) synth.triggerAttackRelease("C5", "16n");
+            } else {
+                btn.style.background = '#450a0a';
+                btn.style.borderColor = '#ef4444';
+                showGesture('👎');
+                if (synth) synth.triggerAttackRelease("F2", "8n");
+            }
+
+            currentQIndex++;
+            setTimeout(nextQuestion, 1000);
+        }
+
+        function showGesture(icon) {
+            const gesture = document.getElementById('gesture-icon');
+            gesture.textContent = icon;
+            gesture.classList.add('active');
+            setTimeout(() => gesture.classList.remove('active'), 800);
+        }
+
+        function throwAntibody(targetIdx) {
+            const start = sentinel.getBoundingClientRect();
+            const target = activeBacteria.find(b => b.el.id === `bug-${targetIdx}`);
+            if(!target) return;
+            
+            const projectile = document.createElement('div');
+            projectile.className = 'antibody-y';
+            projectile.innerHTML = `<svg viewBox="0 0 100 100"><path d="M20,10 L50,50 L80,10 M50,50 L50,90" stroke="#60a5fa" stroke-width="20" fill="none" stroke-linecap="round"/></svg>`;
+            projectile.style.left = '0'; projectile.style.top = '0';
+            projectile.style.transform = `translate(${start.left + 25}px, ${start.top + 25}px)`;
+            projectile.style.transition = 'transform 0.4s ease-out';
+            stage.appendChild(projectile);
+
+            setTimeout(() => {
+                projectile.style.transform = `translate(${target.x + 5}px, ${target.y - 5}px) rotate(45deg)`;
+                setTimeout(() => {
+                    target.el.style.opacity = '0.6';
+                    target.antibody = projectile;
+                }, 400);
+            }, 50);
+        }
+
+        function finishGame() {
+            gameActive = false;
+            hud.style.display = 'none';
+
+            const score = taggedCount / 20;
+            const title = document.getElementById('final-title');
+            const msg = document.getElementById('overlay-msg');
+
+            sentinel.style.top = '25%';
+            sentinel.style.left = '50%';
+            sentinel.style.transform = 'translateX(-50%) scale(1.5)';
+
+            if (score < 0.6) {
+                sentinel.classList.add('sad');
+                title.textContent = "FAILURE";
+                title.className = "text-4xl text-red-500 mb-4";
+                msg.textContent = `Host compromised. ${taggedCount}/20 correct.`;
+            } else if (score < 1.0) {
+                sentinel.classList.add('happy');
+                title.textContent = "SECURED";
+                title.className = "text-4xl text-green-400 mb-4";
+                msg.textContent = `Immunity stable. ${taggedCount}/20 terms mastered.`;
+            } else {
+                sentinel.classList.add('king');
+                title.textContent = "IMMORTAL";
+                title.className = "text-4xl text-yellow-400 mb-4";
+                msg.textContent = `PERFECT! All 20 pathological terms identified.`;
+            }
+
+            overlay.style.display = 'flex';
+            startBtn.textContent = "TRY AGAIN";
+        }
+
+        startBtn.onclick = async () => {
+            if (typeof Tone !== 'undefined') {
+                await Tone.start();
+                if(!synth) synth = new Tone.PolySynth().toDestination();
+            }
+            
+            activeBacteria.forEach(b => {
+                b.el.remove();
+                if(b.antibody) b.antibody.remove();
+            });
+            activeBacteria = [];
+            currentQIndex = 0;
+            taggedCount = 0;
+            gameActive = true;
+            
+            questions = [...dictionary].sort(() => 0.5 - Math.random());
+            
+            sentinel.className = 'wbc-ninja';
+            sentinel.style = ''; // Reset styles
+            
+            hud.style.display = 'block';
+            overlay.style.display = 'none';
+            
+            updateBacteria();
+            nextQuestion();
+        };
+
+    </script>
+</body>
+</html>
