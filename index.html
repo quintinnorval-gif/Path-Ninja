@@ -24,7 +24,7 @@
         /* Top Zone: The Action */
         #battle-zone {
             position: relative;
-            flex: 0 0 40%; /* Exactly 40% of screen height */
+            flex: 0 0 35%; /* Reduced slightly to give UI more room */
             background: radial-gradient(circle at center, #450a0a 0%, #1a0202 100%);
             border-bottom: 2px solid rgba(255,255,255,0.1);
             overflow: hidden;
@@ -32,13 +32,14 @@
 
         /* Bottom Zone: The Questions */
         #ui-zone {
-            flex: 0 0 60%; /* Exactly 60% of screen height */
+            flex: 1; /* Takes remaining space */
             background: #000;
-            padding: 15px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
             box-sizing: border-box;
             z-index: 100;
+            overflow: hidden; /* Main container doesn't scroll */
         }
 
         .wbc-ninja {
@@ -53,8 +54,8 @@
         }
 
         .wbc-body {
-            width: 70px;
-            height: 70px;
+            width: 60px;
+            height: 60px;
             background: #ffffff;
             border-radius: 50%;
             box-shadow: 0 0 20px rgba(255,255,255,0.2);
@@ -69,7 +70,7 @@
             position: absolute;
             top: 25%;
             width: 100%;
-            height: 16px;
+            height: 14px;
             background: #1a1a1a;
             display: flex;
             justify-content: center;
@@ -86,7 +87,7 @@
 
         .bacteria {
             position: absolute;
-            font-size: 32px;
+            font-size: 28px;
             z-index: 10;
             transition: opacity 0.5s;
         }
@@ -107,23 +108,30 @@
         .terminal {
             background: #111;
             border-radius: 12px;
-            padding: 15px;
+            padding: 12px;
             margin-bottom: 12px;
-            flex: 0 0 auto;
+            flex-shrink: 0;
             border: 1px solid #222;
+        }
+
+        /* Scrollable area for options */
+        #options-container {
+            flex: 1;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
+            padding-bottom: 10px;
         }
 
         .answer-btn {
             background: #1a1a1a;
             border: 1px solid #333;
             color: white;
-            padding: 12px;
+            padding: 14px 12px;
             border-radius: 8px;
-            font-size: 14px;
+            font-size: 15px;
             text-align: left;
             width: 100%;
             margin-bottom: 8px;
-            flex: 1; 
             display: flex;
             align-items: center;
             transition: all 0.2s;
@@ -157,6 +165,7 @@
             font-size: 12px;
             font-weight: bold;
             color: white;
+            backdrop-filter: blur(4px);
         }
     </style>
 </head>
@@ -176,16 +185,18 @@
 
     <div id="ui-zone" style="display:none">
         <div class="terminal">
-            <div id="definition-text" class="text-base font-bold text-white leading-tight min-h-[60px] flex items-center">
+            <div id="definition-text" class="text-sm md:text-base font-bold text-white leading-tight min-h-[50px] flex items-center">
                 Scanning...
             </div>
         </div>
-        <div id="options-grid" class="flex flex-col flex-grow"></div>
+        <div id="options-container">
+            <div id="options-grid" class="flex flex-col"></div>
+        </div>
     </div>
 
     <div id="overlay">
         <h1 style="font-family: 'Bungee';" class="text-3xl text-white mb-2">PHAGOCYTE NINJA</h1>
-        <p id="overlay-msg" class="text-white/60 mb-8 text-sm max-w-xs">Tap the correct term to eliminate the pathogens in the view above.</p>
+        <p id="overlay-msg" class="text-white/60 mb-8 text-sm max-w-xs">Tap the correct term to eliminate the pathogens. Scroll the options if needed.</p>
         <button id="start-btn" class="bg-white text-black px-10 py-4 rounded-full font-bold text-lg active:scale-95">
             START DEFENSE
         </button>
@@ -244,8 +255,8 @@
             battleZone.appendChild(b);
             activeBacteria.push({ 
                 el: b, x: startX, y: startY, 
-                vx: (Math.random() - 0.5) * 2, 
-                vy: (Math.random() - 0.5) * 2,
+                vx: (Math.random() - 0.5) * 1.5, 
+                vy: (Math.random() - 0.5) * 1.5,
                 limitX: bRect.width,
                 limitY: bRect.height,
                 antibody: null
@@ -256,8 +267,8 @@
             if(!gameActive) return;
             activeBacteria.forEach(b => {
                 b.x += b.vx; b.y += b.vy;
-                if (b.x < 10 || b.x > b.limitX - 40) b.vx *= -1;
-                if (b.y < 10 || b.y > b.limitY - 40) b.vy *= -1;
+                if (b.x < 10 || b.x > b.limitX - 35) b.vx *= -1;
+                if (b.y < 10 || b.y > b.limitY - 35) b.vy *= -1;
                 
                 b.el.style.transform = `translate(${b.x}px, ${b.y}px)`;
                 if (b.antibody) {
@@ -285,10 +296,13 @@
             opts.forEach(o => {
                 const b = document.createElement('button');
                 b.className = "answer-btn";
-                b.innerHTML = `<span class="mr-2 opacity-30 text-xs">○</span> ${o.term}`;
+                b.innerHTML = `<span class="mr-3 opacity-30 text-xs">○</span> ${o.term}`;
                 b.onclick = () => handleAnswer(o.term === q.term, b);
                 gridEl.appendChild(b);
             });
+            
+            // Scroll back to top of options for new question
+            document.getElementById('options-container').scrollTop = 0;
         }
 
         function handleAnswer(isCorrect, btn) {
