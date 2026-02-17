@@ -16,172 +16,128 @@
             margin: 0;
             touch-action: manipulation;
             user-select: none;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        #game-stage {
-            position: relative;
-            width: 100vw;
             height: 100vh;
-            background: radial-gradient(circle at center, #450a0a 0%, #1a0202 100%);
-            overflow: hidden;
             display: flex;
             flex-direction: column;
         }
 
-        /* Sentinel Positioning */
+        /* Top Zone: The Action */
+        #battle-zone {
+            position: relative;
+            flex: 0 0 40%; /* Exactly 40% of screen height */
+            background: radial-gradient(circle at center, #450a0a 0%, #1a0202 100%);
+            border-bottom: 2px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+        }
+
+        /* Bottom Zone: The Questions */
+        #ui-zone {
+            flex: 0 0 60%; /* Exactly 60% of screen height */
+            background: #000;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            box-sizing: border-box;
+            z-index: 100;
+        }
+
         .wbc-ninja {
             position: absolute;
-            z-index: 100;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 50;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-
-        /* Mobile specific: Sentinel at the TOP */
-        @media (max-width: 768px) {
-            .wbc-ninja {
-                left: 50%;
-                top: 40px;
-                transform: translateX(-50%);
-            }
-        }
-
-        /* Desktop specific: Sentinel on the RIGHT */
-        @media (min-width: 769px) {
-            .wbc-ninja {
-                right: 5%;
-                top: 50%;
-                transform: translateY(-50%);
-            }
         }
 
         .wbc-body {
-            position: relative;
             width: 70px;
             height: 70px;
             background: #ffffff;
             border-radius: 50%;
-            box-shadow: inset -5px -5px 15px rgba(0,0,0,0.1), 0 0 30px rgba(255,255,255,0.3);
+            box-shadow: 0 0 20px rgba(255,255,255,0.2);
             border: 2px solid #e2e8f0;
             display: flex;
             align-items: center;
             justify-content: center;
-            animation: float-wbc 4s infinite ease-in-out;
-        }
-
-        @media (min-width: 769px) {
-            .wbc-body { width: 100px; height: 100px; }
+            animation: float-wbc 3s infinite ease-in-out;
         }
 
         .ninja-mask {
             position: absolute;
             top: 25%;
             width: 100%;
-            height: 18px;
+            height: 16px;
             background: #1a1a1a;
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 8px;
-            overflow: hidden;
         }
 
         .ninja-eye {
-            width: 8px;
-            height: 4px;
+            width: 6px;
+            height: 3px;
             background: white;
             border-radius: 2px;
-            transition: all 0.3s;
         }
-
-        .wbc-ninja.happy .ninja-eye { height: 8px; border-radius: 50%; background: #4ade80; }
-        .wbc-ninja.sad .ninja-eye { height: 10px; width: 10px; clip-path: polygon(50% 0%, 0% 100%, 100% 100%); background: #60a5fa; transform: rotate(180deg); }
-        .wbc-ninja.king .ninja-eye { background: #fbbf24; box-shadow: 0 0 8px #fbbf24; }
-
-        .crown { position: absolute; top: -35px; width: 45px; display: none; }
-        .wbc-ninja.king .crown { display: block; }
-
-        .wbc-gesture {
-            position: absolute;
-            top: -50px;
-            font-size: 40px;
-            opacity: 0;
-            transform: scale(0);
-            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-        }
-        .wbc-gesture.active { opacity: 1; transform: scale(1); }
 
         .bacteria {
             position: absolute;
-            font-size: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            font-size: 32px;
             z-index: 10;
+            transition: opacity 0.5s;
         }
 
         .antibody-y {
             position: absolute;
-            width: 25px;
-            height: 25px;
-            z-index: 150;
+            width: 20px;
+            height: 20px;
+            z-index: 60;
             pointer-events: none;
         }
 
         @keyframes float-wbc {
-            0%, 100% { transform: translateY(0) rotate(0deg); }
-            50% { transform: translateY(-10px) rotate(2deg); }
-        }
-
-        .hud {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 92%;
-            max-width: 600px;
-            z-index: 200;
-        }
-
-        @media (max-width: 768px) {
-            .hud { bottom: 15px; }
-        }
-
-        @media (min-width: 769px) {
-            .hud { top: 20px; }
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
         }
 
         .terminal {
-            background: rgba(0, 0, 0, 0.9);
-            border-top: 2px solid #ffffff;
-            padding: 12px;
+            background: #111;
             border-radius: 12px;
-            backdrop-filter: blur(10px);
+            padding: 15px;
+            margin-bottom: 12px;
+            flex: 0 0 auto;
+            border: 1px solid #222;
         }
 
         .answer-btn {
-            background: rgba(255, 255, 255, 0.07);
-            border: 1px solid rgba(255, 255, 255, 0.15);
+            background: #1a1a1a;
+            border: 1px solid #333;
             color: white;
-            padding: 14px 12px;
-            border-radius: 10px;
-            font-size: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
             text-align: left;
             width: 100%;
-            transition: background 0.1s;
+            margin-bottom: 8px;
+            flex: 1; 
+            display: flex;
+            align-items: center;
+            transition: all 0.2s;
         }
 
         .answer-btn:active {
-            background: rgba(255, 255, 255, 0.25);
+            background: #333;
             transform: scale(0.98);
         }
 
         #overlay {
             position: fixed;
             inset: 0;
-            background: rgba(15, 0, 0, 0.95);
+            background: rgba(0,0,0,0.95);
             z-index: 1000;
             display: flex;
             flex-direction: column;
@@ -191,47 +147,46 @@
             text-align: center;
         }
 
-        .blood-cell {
+        .score-pill {
             position: absolute;
-            background: rgba(185, 28, 28, 0.05);
-            border-radius: 50%;
-            pointer-events: none;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: bold;
+            color: white;
         }
     </style>
 </head>
 <body>
 
-    <div id="game-stage">
-        <div id="bloodstream"></div>
-        
+    <div id="battle-zone">
+        <div class="score-pill">DEFENDED: <span id="q-count">0</span>/20</div>
         <div id="sentinel" class="wbc-ninja">
-            <svg class="crown" viewBox="0 0 100 100">
-                <path d="M10,80 L20,30 L40,50 L50,20 L60,50 L80,30 L90,80 Z" fill="#fbbf24" stroke="#d97706" stroke-width="4"/>
-            </svg>
-            <div id="gesture-icon" class="wbc-gesture">👍</div>
             <div class="wbc-body">
-                <div class="ninja-mask"><div class="ninja-eye"></div><div class="ninja-eye"></div></div>
-            </div>
-        </div>
-
-        <div id="main-hud" class="hud" style="display:none">
-            <div class="terminal mb-2 shadow-2xl">
-                <div class="flex justify-between items-center mb-1">
-                    <span class="text-[10px] text-white/40 font-mono tracking-widest">NEUTRALIZE PATHOGEN</span>
-                    <span class="text-[10px] text-white/50">Score: <span id="q-count" class="text-white">0</span>/20</span>
-                </div>
-                <div id="definition-text" class="text-base md:text-lg font-bold text-white leading-tight h-16 flex items-center">
-                    ...
+                <div class="ninja-mask">
+                    <div class="ninja-eye"></div>
+                    <div class="ninja-eye"></div>
                 </div>
             </div>
-            <div id="options-grid" class="grid grid-cols-1 gap-2"></div>
         </div>
     </div>
 
+    <div id="ui-zone" style="display:none">
+        <div class="terminal">
+            <div id="definition-text" class="text-base font-bold text-white leading-tight min-h-[60px] flex items-center">
+                Scanning...
+            </div>
+        </div>
+        <div id="options-grid" class="flex flex-col flex-grow"></div>
+    </div>
+
     <div id="overlay">
-        <h1 style="font-family: 'Bungee';" id="final-title" class="text-3xl md:text-6xl text-white mb-4">PHAGOCYTE NINJA</h1>
-        <p id="overlay-msg" class="text-blue-100/60 mb-8 text-sm md:text-base max-w-xs">Correctly identify the pathological terms to clear the bloodstream.</p>
-        <button id="start-btn" class="bg-white text-black px-12 py-5 rounded-full font-bold text-xl active:scale-95 transition-transform shadow-xl">
+        <h1 style="font-family: 'Bungee';" class="text-3xl text-white mb-2">PHAGOCYTE NINJA</h1>
+        <p id="overlay-msg" class="text-white/60 mb-8 text-sm max-w-xs">Tap the correct term to eliminate the pathogens in the view above.</p>
+        <button id="start-btn" class="bg-white text-black px-10 py-4 rounded-full font-bold text-lg active:scale-95">
             START DEFENSE
         </button>
     </div>
@@ -267,28 +222,14 @@
         let questions = [];
         let activeBacteria = [];
 
-        const stage = document.getElementById('game-stage');
+        const battleZone = document.getElementById('battle-zone');
+        const uiZone = document.getElementById('ui-zone');
         const overlay = document.getElementById('overlay');
         const startBtn = document.getElementById('start-btn');
         const defEl = document.getElementById('definition-text');
         const gridEl = document.getElementById('options-grid');
         const qCountEl = document.getElementById('q-count');
         const sentinel = document.getElementById('sentinel');
-        const hud = document.getElementById('main-hud');
-
-        function initBackground() {
-            const container = document.getElementById('bloodstream');
-            for(let i=0; i<12; i++) {
-                const cell = document.createElement('div');
-                cell.className = 'blood-cell';
-                const size = 20 + Math.random() * 40;
-                cell.style.width = size + 'px'; cell.style.height = size + 'px';
-                cell.style.left = Math.random() * 100 + 'vw';
-                cell.style.top = Math.random() * 100 + 'vh';
-                container.appendChild(cell);
-            }
-        }
-        initBackground();
 
         function createBacteria(index) {
             const b = document.createElement('div');
@@ -296,20 +237,17 @@
             b.id = `bug-${index}`;
             b.innerHTML = `🦠`;
             
-            // Spawn constraints to keep them visible between UI elements
-            const isMobile = window.innerWidth <= 768;
-            const spawnMinY = isMobile ? 120 : 150;
-            const spawnMaxY = isMobile ? window.innerHeight - 350 : window.innerHeight - 200;
+            const bRect = battleZone.getBoundingClientRect();
+            const startX = 20 + Math.random() * (bRect.width - 40);
+            const startY = 20 + Math.random() * (bRect.height - 40);
             
-            const startX = 40 + Math.random() * (window.innerWidth - 80);
-            const startY = spawnMinY + Math.random() * (spawnMaxY - spawnMinY);
-            
-            stage.appendChild(b);
+            battleZone.appendChild(b);
             activeBacteria.push({ 
                 el: b, x: startX, y: startY, 
-                vx: (Math.random() - 0.5) * 1.5, 
-                vy: (Math.random() - 0.5) * 1.5,
-                spawnMinY, spawnMaxY,
+                vx: (Math.random() - 0.5) * 2, 
+                vy: (Math.random() - 0.5) * 2,
+                limitX: bRect.width,
+                limitY: bRect.height,
                 antibody: null
             });
         }
@@ -318,10 +256,10 @@
             if(!gameActive) return;
             activeBacteria.forEach(b => {
                 b.x += b.vx; b.y += b.vy;
-                if (b.x < 10 || b.x > window.innerWidth - 50) b.vx *= -1;
-                if (b.y < b.spawnMinY || b.y > b.spawnMaxY) b.vy *= -1;
+                if (b.x < 10 || b.x > b.limitX - 40) b.vx *= -1;
+                if (b.y < 10 || b.y > b.limitY - 40) b.vy *= -1;
                 
-                b.el.style.transform = `translate(${b.x}px, ${b.y}px) rotate(${b.x * 0.1}deg)`;
+                b.el.style.transform = `translate(${b.x}px, ${b.y}px)`;
                 if (b.antibody) {
                     b.antibody.style.transform = `translate(${b.x + 5}px, ${b.y - 5}px) rotate(45deg)`;
                 }
@@ -347,13 +285,13 @@
             opts.forEach(o => {
                 const b = document.createElement('button');
                 b.className = "answer-btn";
-                b.innerHTML = `<span>⚡</span> ${o.term}`;
-                b.onclick = () => handleAnswer(o.term === q.term, b, q.term);
+                b.innerHTML = `<span class="mr-2 opacity-30 text-xs">○</span> ${o.term}`;
+                b.onclick = () => handleAnswer(o.term === q.term, b);
                 gridEl.appendChild(b);
             });
         }
 
-        function handleAnswer(isCorrect, btn, correctTerm) {
+        function handleAnswer(isCorrect, btn) {
             const buttons = gridEl.querySelectorAll('button');
             buttons.forEach(b => b.disabled = true);
 
@@ -361,80 +299,50 @@
                 taggedCount++;
                 btn.style.background = '#064e3b';
                 btn.style.borderColor = '#10b981';
-                showGesture('👍');
                 throwAntibody(currentQIndex);
                 if (synth) synth.triggerAttackRelease("C5", "16n");
             } else {
                 btn.style.background = '#450a0a';
                 btn.style.borderColor = '#ef4444';
-                showGesture('👎');
                 if (synth) synth.triggerAttackRelease("F2", "8n");
             }
 
             currentQIndex++;
-            setTimeout(nextQuestion, 800);
-        }
-
-        function showGesture(icon) {
-            const gesture = document.getElementById('gesture-icon');
-            gesture.textContent = icon;
-            gesture.classList.add('active');
-            setTimeout(() => gesture.classList.remove('active'), 600);
+            setTimeout(nextQuestion, 600);
         }
 
         function throwAntibody(targetIdx) {
             const start = sentinel.getBoundingClientRect();
+            const bZoneRect = battleZone.getBoundingClientRect();
             const target = activeBacteria.find(b => b.el.id === `bug-${targetIdx}`);
             if(!target) return;
             
             const projectile = document.createElement('div');
             projectile.className = 'antibody-y';
             projectile.innerHTML = `<svg viewBox="0 0 100 100"><path d="M20,10 L50,50 L80,10 M50,50 L50,90" stroke="#60a5fa" stroke-width="20" fill="none" stroke-linecap="round"/></svg>`;
-            projectile.style.left = '0'; projectile.style.top = '0';
-            projectile.style.transform = `translate(${start.left + 25}px, ${start.top + 25}px)`;
-            projectile.style.transition = 'transform 0.4s ease-out';
-            stage.appendChild(projectile);
+            
+            const startX = start.left + (start.width / 2) - bZoneRect.left;
+            const startY = start.top + (start.height / 2) - bZoneRect.top;
+
+            projectile.style.transform = `translate(${startX}px, ${startY}px)`;
+            projectile.style.transition = 'transform 0.3s ease-out';
+            battleZone.appendChild(projectile);
 
             setTimeout(() => {
                 projectile.style.transform = `translate(${target.x + 5}px, ${target.y - 5}px) rotate(45deg)`;
                 setTimeout(() => {
-                    target.el.style.opacity = '0.5';
+                    target.el.style.opacity = '0.3';
                     target.antibody = projectile;
-                }, 400);
-            }, 50);
+                }, 300);
+            }, 20);
         }
 
         function finishGame() {
             gameActive = false;
-            hud.style.display = 'none';
-
-            const score = taggedCount / 20;
-            const title = document.getElementById('final-title');
-            const msg = document.getElementById('overlay-msg');
-
-            sentinel.style.top = '25%';
-            sentinel.style.left = '50%';
-            sentinel.style.transform = 'translateX(-50%) scale(1.5)';
-
-            if (score < 0.6) {
-                sentinel.classList.add('sad');
-                title.textContent = "FAILURE";
-                title.className = "text-4xl text-red-500 mb-4";
-                msg.textContent = `Pathogens won. ${taggedCount}/20 correct. Study the terminology and return.`;
-            } else if (score < 1.0) {
-                sentinel.classList.add('happy');
-                title.textContent = "SURVIVED";
-                title.className = "text-4xl text-green-400 mb-4";
-                msg.textContent = `Immunity stable. ${taggedCount}/20 terms identified correctly.`;
-            } else {
-                sentinel.classList.add('king');
-                title.textContent = "IMMORTAL";
-                title.className = "text-4xl text-yellow-400 mb-4";
-                msg.textContent = `PERFECT! You have mastered the fundamentals of pathophysiology.`;
-            }
-
+            uiZone.style.display = 'none';
             overlay.style.display = 'flex';
-            startBtn.textContent = "RESTART PROTOCOL";
+            document.getElementById('overlay-msg').textContent = `Defense Complete. Final Score: ${taggedCount}/20.`;
+            startBtn.textContent = "PLAY AGAIN";
         }
 
         startBtn.onclick = async () => {
@@ -454,10 +362,7 @@
             
             questions = [...dictionary].sort(() => 0.5 - Math.random());
             
-            sentinel.className = 'wbc-ninja';
-            sentinel.style = ''; // Reset positioning
-            
-            hud.style.display = 'block';
+            uiZone.style.display = 'flex';
             overlay.style.display = 'none';
             
             updateBacteria();
