@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Body Sentinels: Mobile Protocol</title>
+    <title>Body Sentinels: Pathogen Defense</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;700&family=Bungee&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
@@ -29,13 +29,9 @@
             flex-direction: column;
         }
 
+        /* Sentinel Positioning */
         .wbc-ninja {
             position: absolute;
-            right: 5%;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 80px;
-            height: 80px;
             z-index: 100;
             display: flex;
             flex-direction: column;
@@ -44,15 +40,21 @@
             transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        /* Mobile layout for the character */
+        /* Mobile specific: Sentinel at the TOP */
         @media (max-width: 768px) {
             .wbc-ninja {
-                right: auto;
                 left: 50%;
-                top: 80px;
+                top: 40px;
                 transform: translateX(-50%);
-                width: 70px;
-                height: 70px;
+            }
+        }
+
+        /* Desktop specific: Sentinel on the RIGHT */
+        @media (min-width: 769px) {
+            .wbc-ninja {
+                right: 5%;
+                top: 50%;
+                transform: translateY(-50%);
             }
         }
 
@@ -136,7 +138,6 @@
 
         .hud {
             position: absolute;
-            bottom: 20px;
             left: 50%;
             transform: translateX(-50%);
             width: 92%;
@@ -144,15 +145,18 @@
             z-index: 200;
         }
 
-        /* Adjust HUD for desktop */
+        @media (max-width: 768px) {
+            .hud { bottom: 15px; }
+        }
+
         @media (min-width: 769px) {
-            .hud { top: 20px; bottom: auto; }
+            .hud { top: 20px; }
         }
 
         .terminal {
             background: rgba(0, 0, 0, 0.9);
             border-top: 2px solid #ffffff;
-            padding: 15px;
+            padding: 12px;
             border-radius: 12px;
             backdrop-filter: blur(10px);
         }
@@ -161,16 +165,17 @@
             background: rgba(255, 255, 255, 0.07);
             border: 1px solid rgba(255, 255, 255, 0.15);
             color: white;
-            padding: 12px;
+            padding: 14px 12px;
             border-radius: 10px;
-            font-size: 14px;
+            font-size: 15px;
             text-align: left;
             width: 100%;
-            transition: background 0.2s;
+            transition: background 0.1s;
         }
 
         .answer-btn:active {
             background: rgba(255, 255, 255, 0.25);
+            transform: scale(0.98);
         }
 
         #overlay {
@@ -206,18 +211,17 @@
             <div id="gesture-icon" class="wbc-gesture">👍</div>
             <div class="wbc-body">
                 <div class="ninja-mask"><div class="ninja-eye"></div><div class="ninja-eye"></div></div>
-                <div id="tear-container"></div>
             </div>
         </div>
 
         <div id="main-hud" class="hud" style="display:none">
-            <div class="terminal mb-3 shadow-2xl">
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-[9px] text-blue-400 font-bold uppercase tracking-widest">Immune-Mobile v1</span>
-                    <span class="text-[9px] text-white/50">Score: <span id="q-count" class="text-white">0</span>/20</span>
+            <div class="terminal mb-2 shadow-2xl">
+                <div class="flex justify-between items-center mb-1">
+                    <span class="text-[10px] text-white/40 font-mono tracking-widest">NEUTRALIZE PATHOGEN</span>
+                    <span class="text-[10px] text-white/50">Score: <span id="q-count" class="text-white">0</span>/20</span>
                 </div>
-                <div id="definition-text" class="text-base md:text-lg font-bold text-white leading-tight h-14 flex items-center">
-                    Analyzing pathogens...
+                <div id="definition-text" class="text-base md:text-lg font-bold text-white leading-tight h-16 flex items-center">
+                    ...
                 </div>
             </div>
             <div id="options-grid" class="grid grid-cols-1 gap-2"></div>
@@ -226,8 +230,8 @@
 
     <div id="overlay">
         <h1 style="font-family: 'Bungee';" id="final-title" class="text-3xl md:text-6xl text-white mb-4">PHAGOCYTE NINJA</h1>
-        <p id="overlay-msg" class="text-blue-100/60 mb-8 text-sm md:text-base max-w-xs">Neutralize 20 specific pathological threats. Tap the correct term to engage.</p>
-        <button id="start-btn" class="bg-white text-black px-10 py-4 rounded-full font-bold text-lg active:scale-95 transition-transform">
+        <p id="overlay-msg" class="text-blue-100/60 mb-8 text-sm md:text-base max-w-xs">Correctly identify the pathological terms to clear the bloodstream.</p>
+        <button id="start-btn" class="bg-white text-black px-12 py-5 rounded-full font-bold text-xl active:scale-95 transition-transform shadow-xl">
             START DEFENSE
         </button>
     </div>
@@ -274,7 +278,7 @@
 
         function initBackground() {
             const container = document.getElementById('bloodstream');
-            for(let i=0; i<15; i++) {
+            for(let i=0; i<12; i++) {
                 const cell = document.createElement('div');
                 cell.className = 'blood-cell';
                 const size = 20 + Math.random() * 40;
@@ -292,15 +296,20 @@
             b.id = `bug-${index}`;
             b.innerHTML = `🦠`;
             
-            // Random positioning based on screen size
-            const startX = 20 + Math.random() * (window.innerWidth - 80);
-            const startY = 150 + Math.random() * (window.innerHeight - 400);
+            // Spawn constraints to keep them visible between UI elements
+            const isMobile = window.innerWidth <= 768;
+            const spawnMinY = isMobile ? 120 : 150;
+            const spawnMaxY = isMobile ? window.innerHeight - 350 : window.innerHeight - 200;
+            
+            const startX = 40 + Math.random() * (window.innerWidth - 80);
+            const startY = spawnMinY + Math.random() * (spawnMaxY - spawnMinY);
             
             stage.appendChild(b);
             activeBacteria.push({ 
                 el: b, x: startX, y: startY, 
-                vx: (Math.random() - 0.5) * 2, 
-                vy: (Math.random() - 0.5) * 2,
+                vx: (Math.random() - 0.5) * 1.5, 
+                vy: (Math.random() - 0.5) * 1.5,
+                spawnMinY, spawnMaxY,
                 antibody: null
             });
         }
@@ -310,7 +319,8 @@
             activeBacteria.forEach(b => {
                 b.x += b.vx; b.y += b.vy;
                 if (b.x < 10 || b.x > window.innerWidth - 50) b.vx *= -1;
-                if (b.y < 150 || b.y > window.innerHeight - 300) b.vy *= -1;
+                if (b.y < b.spawnMinY || b.y > b.spawnMaxY) b.vy *= -1;
+                
                 b.el.style.transform = `translate(${b.x}px, ${b.y}px) rotate(${b.x * 0.1}deg)`;
                 if (b.antibody) {
                     b.antibody.style.transform = `translate(${b.x + 5}px, ${b.y - 5}px) rotate(45deg)`;
@@ -337,7 +347,7 @@
             opts.forEach(o => {
                 const b = document.createElement('button');
                 b.className = "answer-btn";
-                b.innerHTML = `<span>•</span> ${o.term}`;
+                b.innerHTML = `<span>⚡</span> ${o.term}`;
                 b.onclick = () => handleAnswer(o.term === q.term, b, q.term);
                 gridEl.appendChild(b);
             });
@@ -362,14 +372,14 @@
             }
 
             currentQIndex++;
-            setTimeout(nextQuestion, 1000);
+            setTimeout(nextQuestion, 800);
         }
 
         function showGesture(icon) {
             const gesture = document.getElementById('gesture-icon');
             gesture.textContent = icon;
             gesture.classList.add('active');
-            setTimeout(() => gesture.classList.remove('active'), 800);
+            setTimeout(() => gesture.classList.remove('active'), 600);
         }
 
         function throwAntibody(targetIdx) {
@@ -388,7 +398,7 @@
             setTimeout(() => {
                 projectile.style.transform = `translate(${target.x + 5}px, ${target.y - 5}px) rotate(45deg)`;
                 setTimeout(() => {
-                    target.el.style.opacity = '0.6';
+                    target.el.style.opacity = '0.5';
                     target.antibody = projectile;
                 }, 400);
             }, 50);
@@ -410,21 +420,21 @@
                 sentinel.classList.add('sad');
                 title.textContent = "FAILURE";
                 title.className = "text-4xl text-red-500 mb-4";
-                msg.textContent = `Host compromised. ${taggedCount}/20 correct.`;
+                msg.textContent = `Pathogens won. ${taggedCount}/20 correct. Study the terminology and return.`;
             } else if (score < 1.0) {
                 sentinel.classList.add('happy');
-                title.textContent = "SECURED";
+                title.textContent = "SURVIVED";
                 title.className = "text-4xl text-green-400 mb-4";
-                msg.textContent = `Immunity stable. ${taggedCount}/20 terms mastered.`;
+                msg.textContent = `Immunity stable. ${taggedCount}/20 terms identified correctly.`;
             } else {
                 sentinel.classList.add('king');
                 title.textContent = "IMMORTAL";
                 title.className = "text-4xl text-yellow-400 mb-4";
-                msg.textContent = `PERFECT! All 20 pathological terms identified.`;
+                msg.textContent = `PERFECT! You have mastered the fundamentals of pathophysiology.`;
             }
 
             overlay.style.display = 'flex';
-            startBtn.textContent = "TRY AGAIN";
+            startBtn.textContent = "RESTART PROTOCOL";
         }
 
         startBtn.onclick = async () => {
@@ -445,7 +455,7 @@
             questions = [...dictionary].sort(() => 0.5 - Math.random());
             
             sentinel.className = 'wbc-ninja';
-            sentinel.style = ''; // Reset styles
+            sentinel.style = ''; // Reset positioning
             
             hud.style.display = 'block';
             overlay.style.display = 'none';
